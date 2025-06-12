@@ -1,24 +1,24 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const axios = require('axios');
+const express = require("express");
+const axios = require("axios");
+
 const app = express();
-const port = process.env.PORT || 3000;
+app.use(express.json());
 
-app.use(bodyParser.json());
+const targetURL = "https://script.google.com/macros/s/AKfycbweorjb_7m4U_SXkmZ-8Z-l2OiluBCaP9KEv2mDkBMV0RHR0mrw3XvHUlFQ7-4cnKRB/exec";
 
-app.post('/doughlog', async (req, res) => {
+app.post("/doughlog", async (req, res) => {
   try {
-    const response = await axios.post(
-      'https://script.google.com/macros/s/AKfycbxQQj-XIVy7rrZlXrMmKpjhkPj51MUUF-hw0CVUtuMjLI1PnReMeKgpZi3hi2Xeqto8yg/exec',
-      req.body
-    );
-    res.status(200).send(response.data);
+    const response = await axios.post(targetURL, req.body, {
+      headers: { "Content-Type": "application/json" },
+    });
+    res.status(response.status).send(response.data);
   } catch (error) {
-    console.error('Logging failed:', error.message);
-    res.status(500).send('Logging failed');
+    console.error("Proxy error:", error.response?.data || error.message);
+    res.status(500).send("Proxy failed to forward request");
   }
 });
 
-app.listen(port, () => {
-  console.log(`Proxy server running on port ${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Proxy server listening on port ${PORT}`);
 });
