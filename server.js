@@ -9,7 +9,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbweorjb_7m4U_SXkmZ-8Z-l2OiluBCaP9KEv2mDkBMV0RHR0mrw3XvHUlFQ7-4cnKRB/exec";
+const GOOGLE_SCRIPT_URL = const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlb5JhZFROSIAsFaJUxK5Qrk6insycAncovhCSBB10uF2h_SsMttoUq2kfpPY7yynh/exec";
 
 // POST to log dough entry
 app.post("/doughlog", async (req, res) => {
