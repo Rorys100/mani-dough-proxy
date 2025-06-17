@@ -29,26 +29,24 @@ app.post('/doughlog', async (req, res) => {
 // 🔁 GET to Make's webhook
 app.get('/getlog', async (req, res) => {
   try {
-    const url = new URL('https://hook.eu2.make.com/3qext...1588e');
+    const url = new URL('https://hook.eu2.make.com/3qextlv5hy7rdb0c2w3dcezp2ah1588e');
     for (const [key, value] of Object.entries(req.query)) {
       url.searchParams.append(key, value);
     }
 
     const response = await fetch(url);
-    const data = await response.json();
-    res.status(200).json({
-      success: true,
-      forwarded: 'GET',
-      response: data,
-    });
+    const text = await response.text();
+
+    // Try parse if JSON, else forward as plain
+    try {
+      const data = JSON.parse(text);
+      res.status(200).json({ success: true, forwarded: 'GET', response: data });
+    } catch {
+      res.status(500).json({ success: false, error: text }); // clearly pass raw error
+    }
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Proxy listening on port ${PORT}`);
-});
 
