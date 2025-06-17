@@ -1,41 +1,43 @@
-const express = require("express");
-const axios = require("axios");
-const cors = require("cors");
-require("dotenv").config();
+import express from 'express';
+import fetch from 'node-fetch';
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
-
-// Use your latest Apps Script endpoint here
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlb5JhZFROSIAsFaJUxK5Qrk6insycAncovhCSBB10uF2h_SsMttoUq2kfpPY7yynh/exec";
-
-// POST: Forward dough log or weekly plan data
-app.post("/doughlog", async (req, res) => {
+// 🔁 Forward POST to Make's doPOST webhook
+app.post('/doughlog', async (req, res) => {
   try {
-    const response = await axios.post(GOOGLE_SCRIPT_URL, req.body, {
-      headers: { "Content-Type": "application/json" },
+    const response = await fetch('https://hook.eu2.make.com/4bwcz7pnou32dui6g04v619rkcv6edo3', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
     });
-    res.status(200).json({ success: true, data: response.data });
-  } catch (error) {
-    console.error("Error forwarding to Google Script:", error.response?.data || error.message);
-    res.status(500).json({ error: "Failed to log entry" });
+
+    const data = await response.text();
+    res.status(200).json({ success: true, forwarded: 'POST', response: data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// GET: Retrieve all sheet data
-app.get("/getlog", async (req, res) => {
+// 🔁 Forward GET to Make's doGET webhook
+app.get('/getlog', async (req, res) => {
   try {
-    const response = await axios.get(GOOGLE_SCRIPT_URL);
-    res.status(200).json({ success: true, data: response.data });
-  } catch (error) {
-    console.error("Error fetching sheet data:", error.response?.data || error.message);
-    res.status(500).json({ error: "Failed to retrieve data" });
+    const url = new URL('https://hook.eu2.make.com/3qextlv5hy7rdb0c2w3dcezp2ah1588e');
+    for (const [key, value] of Object.entries(req.query)) {
+      url.searchParams.append(key, value);
+    }
+
+    const response = await fetch(url);
+    const data = await response.json();
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Proxy server running on port ${PORT}`);
+  console.log(`🚀 Proxy listening on port ${PORT}`);
 });
+
