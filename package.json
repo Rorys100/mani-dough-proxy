@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node server.js"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "axios": "^1.6.0",
     "cors": "^2.8.5",
@@ -14,4 +17,5 @@
     "node-fetch": "^3.3.2"
   }
 }
+
 
