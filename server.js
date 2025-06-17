@@ -1,32 +1,28 @@
 import express from 'express';
-import fetch from 'node-fetch';
 import cors from 'cors';
+import fetch from 'node-fetch';
 
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-// 🔁 POST to Make's webhook
+// 🔁 POST forwarding (used for logging entries)
 app.post('/doughlog', async (req, res) => {
   try {
-    const response = await fetch('https://hook.eu2.make.com/4bwc...6ed03', {
+    const response = await fetch('https://hook.eu2.make.com/4bwc27pnou32dui6g04v619r9kcvc6ed03', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(req.body)
     });
 
-    const data = await response.text(); // Make often returns plain text
-    res.status(200).json({
-      success: true,
-      forwarded: 'POST',
-      response: data,
-    });
+    const data = await response.json();
+    res.status(200).json({ success: true, forwarded: 'POST', response: data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// 🔁 GET to Make's webhook
+// 🔁 GET forwarding (used for retrieving log data)
 app.get('/getlog', async (req, res) => {
   try {
     const url = new URL('https://hook.eu2.make.com/3qextlv5hy7rdb0c2w3dcezp2ah1588e');
@@ -34,19 +30,17 @@ app.get('/getlog', async (req, res) => {
       url.searchParams.append(key, value);
     }
 
-    const response = await fetch(url);
-    const text = await response.text();
-
-    // Try parse if JSON, else forward as plain
-    try {
-      const data = JSON.parse(text);
-      res.status(200).json({ success: true, forwarded: 'GET', response: data });
-    } catch {
-      res.status(500).json({ success: false, error: text }); // clearly pass raw error
-    }
+    const response = await fetch(url.toString());
+    const data = await response.json();
+    res.status(200).json({ success: true, forwarded: 'GET', response: data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
+// ✅ Required for Render to bind to a port
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Proxy listening on port ${PORT}`);
+});
 
