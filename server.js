@@ -30,14 +30,17 @@ app.get('/getlog', async (req, res) => {
 
     const response = await fetch(url);
     const data = await response.json();
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Proxy listening on port ${PORT}`);
+    res.status(200).json({
+      success: true,
+      forwarded: 'GET',
+      response: data
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
 });
 
